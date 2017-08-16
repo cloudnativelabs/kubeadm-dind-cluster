@@ -61,8 +61,11 @@ DASHBOARD_URL="${DASHBOARD_URL:-https://rawgit.com/kubernetes/dashboard/bfab1015
 SKIP_SNAPSHOT="${SKIP_SNAPSHOT:-}"
 E2E_REPORT_DIR="${E2E_REPORT_DIR:-}"
 
-if [[ ! ${LOCAL_KUBECTL_VERSION:-} && ${DIND_IMAGE:-} =~ :(v[0-9]+\.[0-9]+)$ ]]; then
-  LOCAL_KUBECTL_VERSION="${BASH_REMATCH[1]}"
+if [[ ${DIND_IMAGE:-} =~ :(v[0-9]+\.[0-9]+)$ ]]; then
+    DIND_KUBE_VERSION="${BASH_REMATCH[1]}"
+    if [[ ! ${LOCAL_KUBECTL_VERSION:-} ]]; then
+        LOCAL_KUBECTL_VERSION="${DIND_KUBE_VERSION}"
+    fi
 fi
 
 function dind::need-source {
@@ -846,6 +849,13 @@ function dind::do-run-e2e {
     term="-it"
     test_args="--ginkgo.noColor ${test_args}"
   fi
+  if [ "${DIND_KUBE_VERSION}" = "1.5" ]; then
+    check_version_skew_arg="--check_version_skew"
+  else
+    check_version_skew_arg="--check-version-skew"
+  fi
+  local verbose="--v"
+  [ -n "${E2E_QUIET}" ] && verbose=""
   docker run \
          --rm ${term} \
          --net=host \
@@ -861,7 +871,7 @@ function dind::do-run-e2e {
          bash -c "cluster/kubectl.sh config set-cluster dind --server='http://localhost:${APISERVER_PORT}' --insecure-skip-tls-verify=true &&
          cluster/kubectl.sh config set-context dind --cluster=dind &&
          cluster/kubectl.sh config use-context dind &&
-         go run hack/e2e.go -- --v --test --check-version-skew=false --test_args='${test_args}'"
+         go run hack/e2e.go -- ${verbose} --test ${check_version_skew_arg}=false --test_args='${test_args}'"
 }
 
 function dind::clean {
