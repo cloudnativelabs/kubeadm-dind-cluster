@@ -61,8 +61,11 @@ DASHBOARD_URL="${DASHBOARD_URL:-https://rawgit.com/kubernetes/dashboard/bfab1015
 SKIP_SNAPSHOT="${SKIP_SNAPSHOT:-}"
 E2E_REPORT_DIR="${E2E_REPORT_DIR:-}"
 
-if [[ ! ${LOCAL_KUBECTL_VERSION:-} && ${DIND_IMAGE:-} =~ :(v[0-9]+\.[0-9]+)$ ]]; then
-  LOCAL_KUBECTL_VERSION="${BASH_REMATCH[1]}"
+if [[ ${DIND_IMAGE:-} =~ :(v[0-9]+\.[0-9]+)$ ]]; then
+    DIND_KUBE_VERSION="${BASH_REMATCH[1]}"
+    if [[ ! ${LOCAL_KUBECTL_VERSION:-} ]]; then
+        LOCAL_KUBECTL_VERSION="${DIND_KUBE_VERSION}"
+    fi
 fi
 
 function dind::need-source {
@@ -297,7 +300,7 @@ function dind::ensure-downloaded-kubectl {
       kubectl_sha1_darwin=22508c8593b0d3c2d78860bd2f60106c376ee226
       ;;
     v1.7)
-      full_kubectl_version=v1.7.3
+      full_kubectl_version=v1.7.4
       kubectl_sha1_linux=14266c30ad018a493c69ffd161aa3dbf14b09577
       kubectl_sha1_darwin=ee427bf58dac24a00273f0daa4e894027934f624
       ;;
@@ -846,6 +849,13 @@ function dind::do-run-e2e {
     term="-it"
     test_args="--ginkgo.noColor ${test_args}"
   fi
+  if [ "${DIND_KUBE_VERSION}" = "1.5" ]; then
+    check_version_skew_arg="--check_version_skew"
+  else
+    check_version_skew_arg="--check-version-skew"
+  fi
+  local verbose="--v"
+  [ -n "${E2E_QUIET}" ] && verbose=""
   docker run \
          --rm ${term} \
          --net=host \
@@ -861,7 +871,7 @@ function dind::do-run-e2e {
          bash -c "cluster/kubectl.sh config set-cluster dind --server='http://localhost:${APISERVER_PORT}' --insecure-skip-tls-verify=true &&
          cluster/kubectl.sh config set-context dind --cluster=dind &&
          cluster/kubectl.sh config use-context dind &&
-         go run hack/e2e.go -- --v --test --check-version-skew=false --test_args='${test_args}'"
+         go run hack/e2e.go -- ${verbose} --test ${check_version_skew_arg}=false --test_args='${test_args}'"
 }
 
 function dind::clean {

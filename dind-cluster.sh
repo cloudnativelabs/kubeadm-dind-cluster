@@ -300,7 +300,7 @@ function dind::ensure-downloaded-kubectl {
       kubectl_sha1_darwin=22508c8593b0d3c2d78860bd2f60106c376ee226
       ;;
     v1.7)
-      full_kubectl_version=v1.7.3
+      full_kubectl_version=v1.7.4
       kubectl_sha1_linux=14266c30ad018a493c69ffd161aa3dbf14b09577
       kubectl_sha1_darwin=ee427bf58dac24a00273f0daa4e894027934f624
       ;;
