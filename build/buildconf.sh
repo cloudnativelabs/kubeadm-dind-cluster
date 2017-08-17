@@ -12,9 +12,9 @@ HYPERKUBE_SHA1_1_6=218d820797bbabe92cc036c2caa48915977c777f
 
 # Version 1.7.4
 KUBEADM_URL_1_7='https://storage.googleapis.com/kubernetes-release/release/v1.7.4/bin/linux/amd64/kubeadm'
-KUBEADM_SHA1_1_7=9a9173220c153d99565736b626d13d03cb273d2c
+KUBEADM_SHA1_1_7=de966e4330b2846da6fd1d80f160e75709de9dbf
 HYPERKUBE_URL_1_7='https://storage.googleapis.com/kubernetes-release/release/v1.7.4/bin/linux/amd64/hyperkube'
-HYPERKUBE_SHA1_1_7=a74f4c4789b0b00c81370421dc395911e8cf54e8
+HYPERKUBE_SHA1_1_7=e01132104efc36603b75e22765caab0241214120
 
 # KUBEADM_URL=${KUBEADM_URL:-${KUBEADM_URL_1_5}}
 # KUBEADM_SHA1=${KUBEADM_SHA1:-${KUBEADM_SHA1_1_5}}
